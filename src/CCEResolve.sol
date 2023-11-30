@@ -18,24 +18,23 @@ interface Resolver {
 contract ENSResolver is CCIPReceiver {
     event ResolvedRequestSent(string ensDomain, address resolver);
 
-    address public immutable i_ens;
+    address public constant ENS_ADDRESS = 0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e; // same for every chain
     address public immutable i_link;
     address public immutable i_receiver;
     uint64 public immutable i_destinationChainSelector;
 
-    constructor(address _router, address _link, address _receiver, uint64 _destinationChainSelector, address _ens)
+    constructor(address _router, address _link, address _receiver, uint64 _destinationChainSelector)
         CCIPReceiver(_router)
     {
         i_link = _link;
         LinkTokenInterface(i_link).approve(i_router, type(uint256).max);
         i_receiver = _receiver;
         i_destinationChainSelector = _destinationChainSelector;
-        i_ens = _ens;
     }
 
     function resolve(string memory _domain) private view returns (address) {
         bytes32 node = keccak256(abi.encodePacked(bytes32(0), keccak256(abi.encodePacked(_domain))));
-        Resolver resolver = ENS(i_ens).resolver(node);
+        Resolver resolver = ENS(ENS_ADDRESS).resolver(node);
         return resolver.addr(node);
     }
 
