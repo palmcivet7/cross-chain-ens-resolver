@@ -44,10 +44,24 @@ contract CCEResolve is CCIPReceiver, Ownable {
     function resolveOwner(string memory _domain) private view returns (address) {
         bytes32 node = bytes(_domain).namehash();
         address owner = ENS(ENS_ADDRESS).owner(node);
+
         if (owner == NAME_WRAPPER_ADDRESS) {
-            return INameWrapper(NAME_WRAPPER_ADDRESS).ownerOf(uint256(node));
+            string memory label = getLabelFromDomain(_domain);
+            uint256 tokenId = uint256(keccak256(bytes(label)));
+            return INameWrapper(NAME_WRAPPER_ADDRESS).ownerOf(tokenId);
         }
         return owner;
+    }
+
+    function getLabelFromDomain(string memory _domain) private pure returns (string memory) {
+        bytes memory domainBytes = bytes(_domain);
+        bytes memory labelBytes = new bytes(domainBytes.length - 4);
+        assembly {
+            let src := add(domainBytes, 32)
+            let dest := add(labelBytes, 32)
+            mstore(dest, mload(src))
+        }
+        return string(labelBytes);
     }
 
     function _ccipReceive(Client.Any2EVMMessage memory message) internal override {
