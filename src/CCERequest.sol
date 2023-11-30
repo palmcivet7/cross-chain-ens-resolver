@@ -14,6 +14,7 @@ contract CCERequest is CCIPReceiver {
     event RequestResolved(string ensDomain, address resolvedAddress);
 
     address public immutable i_link;
+    string public s_lastDomainRequested;
     address public s_lastRequestResolved;
 
     constructor(address _router, address _link) CCIPReceiver(_router) {
@@ -32,6 +33,7 @@ contract CCERequest is CCIPReceiver {
             extraArgs: "",
             feeToken: i_link
         });
+        s_lastDomainRequested = _ensDomain;
         IRouterClient(i_router).ccipSend(_destinationChainSelector, message);
         emit ResolutionRequested(_ensDomain);
     }
