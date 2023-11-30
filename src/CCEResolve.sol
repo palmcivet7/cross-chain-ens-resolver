@@ -8,15 +8,11 @@ import {CCIPReceiver} from "@chainlink/contracts-ccip/src/v0.8/ccip/applications
 import {LinkTokenInterface} from "@chainlink-brownie-contracts/contracts/src/v0.8/interfaces/LinkTokenInterface.sol";
 
 interface ENS {
-    function resolver(bytes32 node) external view returns (Resolver);
-}
-
-interface Resolver {
-    function addr(bytes32 node) external view returns (address);
+    function owner(bytes32 node) external view returns (address);
 }
 
 contract CCEResolve is CCIPReceiver {
-    event ResolvedRequestSent(string ensDomain, address resolver);
+    event OwnerSent(string ensDomain, address owner);
 
     address public constant ENS_ADDRESS = 0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e; // same for every chain
     address public immutable i_link;
@@ -32,26 +28,26 @@ contract CCEResolve is CCIPReceiver {
         i_destinationChainSelector = _destinationChainSelector;
     }
 
-    function resolve(string memory _domain) private view returns (address) {
+    function resolveOwner(string memory _domain) private view returns (address) {
         bytes32 node = keccak256(abi.encodePacked(bytes32(0), keccak256(abi.encodePacked(_domain))));
-        Resolver resolver = ENS(ENS_ADDRESS).resolver(node);
-        return resolver.addr(node);
+        address owner = ENS(ENS_ADDRESS).owner(node);
+        return owner;
     }
 
     function _ccipReceive(Client.Any2EVMMessage memory message) internal override {
         string memory ensDomain = abi.decode(message.data, (string));
-        sendResolvedRequest(ensDomain, resolve(ensDomain));
+        sendResolvedRequest(ensDomain, resolveOwner(ensDomain));
     }
 
-    function sendResolvedRequest(string memory _ensDomain, address _resolver) private {
+    function sendResolvedRequest(string memory _ensDomain, address _owner) private {
         Client.EVM2AnyMessage memory message = Client.EVM2AnyMessage({
             receiver: abi.encode(i_receiver),
-            data: abi.encode(_ensDomain, _resolver),
+            data: abi.encode(_ensDomain, _owner),
             tokenAmounts: new Client.EVMTokenAmount[](0),
             extraArgs: "",
             feeToken: i_link
         });
         IRouterClient(i_router).ccipSend(i_destinationChainSelector, message);
-        emit ResolvedRequestSent(_ensDomain, _resolver);
+        emit OwnerSent(_ensDomain, _owner);
     }
 }
