@@ -15,7 +15,7 @@ interface Resolver {
     function addr(bytes32 node) external view returns (address);
 }
 
-contract ENSResolver is CCIPReceiver {
+contract CCEResolve is CCIPReceiver {
     event ResolvedRequestSent(string ensDomain, address resolver);
 
     address public constant ENS_ADDRESS = 0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e; // same for every chain
