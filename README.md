@@ -4,8 +4,8 @@ This project allows users to resolve the owner address of an ENS domain across c
 
 [CCERequest on Fuji](https://testnet.snowtrace.io/address/0x5C1E7e6AdB4EF2E7337619EAfD1C8d9Ada80690a#code-43113)
 
-[CCEResolve on Sepolia](https://sepolia.etherscan.io/address/0xb3924dbf3c935086DC75D5175b9cE640c8B9E1a2#code)
+[CCEResolve on Sepolia](https://sepolia.etherscan.io/address/0x49e9e7BF2b53c075795659AC9Ce84Bd294857402#code)
 
-0xb3924dbf3c935086DC75D5175b9cE640c8B9E1a2
-palmcivet.eth
-16015286601757825753
+[txs on CCIP](https://ccip.chain.link/tx/0x9b793c405f693dfc7c97e685655c88b423a500b4376873044292490d145e5b0d)
+
+[tx on Fuji](https://testnet.snowtrace.io/tx/0x9cf555676adf676f150b094e06e391e66f839e066b21985c6cc1e1b049985aec?chainId=43113#eventlog)
