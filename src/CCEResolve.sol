@@ -7,6 +7,7 @@ import {Client} from "@chainlink/contracts-ccip/src/v0.8/ccip/libraries/Client.s
 import {CCIPReceiver} from "@chainlink/contracts-ccip/src/v0.8/ccip/applications/CCIPReceiver.sol";
 import {LinkTokenInterface} from "@chainlink-brownie-contracts/contracts/src/v0.8/interfaces/LinkTokenInterface.sol";
 import {ENSNamehash} from "@ens-namehash/contracts/ENSNameHash.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 interface ENS {
     function owner(bytes32 node) external view returns (address);
@@ -16,7 +17,10 @@ interface INameWrapper {
     function ownerOf(uint256 tokenId) external view returns (address);
 }
 
-contract CCEResolve is CCIPReceiver {
+contract CCEResolve is CCIPReceiver, Ownable {
+    error CCEResolve__NoLinkToWithdraw();
+    error CCEResolve__LinkTransferFailed();
+
     using ENSNamehash for bytes;
 
     event OwnerSent(string ensDomain, address owner);
@@ -29,6 +33,7 @@ contract CCEResolve is CCIPReceiver {
 
     constructor(address _router, address _link, address _receiver, uint64 _destinationChainSelector)
         CCIPReceiver(_router)
+        Ownable(msg.sender)
     {
         i_link = _link;
         LinkTokenInterface(i_link).approve(i_router, type(uint256).max);
@@ -60,5 +65,12 @@ contract CCEResolve is CCIPReceiver {
         });
         IRouterClient(i_router).ccipSend(i_destinationChainSelector, message);
         emit OwnerSent(_ensDomain, _owner);
+    }
+
+    function withdrawLink() public onlyOwner {
+        uint256 balance = LinkTokenInterface(i_link).balanceOf(address(this));
+        if (balance == 0) revert CCEResolve__NoLinkToWithdraw();
+
+        if (!LinkTokenInterface(i_link).transfer(msg.sender, balance)) revert CCEResolve__LinkTransferFailed();
     }
 }
