@@ -12,12 +12,17 @@ interface ENS {
     function owner(bytes32 node) external view returns (address);
 }
 
+interface INameWrapper {
+    function ownerOf(uint256 tokenId) external view returns (address);
+}
+
 contract CCEResolve is CCIPReceiver {
     using ENSNamehash for bytes;
 
     event OwnerSent(string ensDomain, address owner);
 
     address public constant ENS_ADDRESS = 0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e; // same for every chain
+    address public constant NAME_WRAPPER_ADDRESS = 0x0635513f179D50A207757E05759CbD106d7dFcE8;
     address public immutable i_link;
     address public immutable i_receiver;
     uint64 public immutable i_destinationChainSelector;
@@ -34,6 +39,9 @@ contract CCEResolve is CCIPReceiver {
     function resolveOwner(string memory _domain) private view returns (address) {
         bytes32 node = bytes(_domain).namehash();
         address owner = ENS(ENS_ADDRESS).owner(node);
+        if (owner == NAME_WRAPPER_ADDRESS) {
+            return INameWrapper(NAME_WRAPPER_ADDRESS).ownerOf(uint256(node));
+        }
         return owner;
     }
 
