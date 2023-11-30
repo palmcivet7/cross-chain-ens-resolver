@@ -6,12 +6,15 @@ import {IRouterClient} from "@chainlink/contracts-ccip/src/v0.8/ccip/interfaces/
 import {Client} from "@chainlink/contracts-ccip/src/v0.8/ccip/libraries/Client.sol";
 import {CCIPReceiver} from "@chainlink/contracts-ccip/src/v0.8/ccip/applications/CCIPReceiver.sol";
 import {LinkTokenInterface} from "@chainlink-brownie-contracts/contracts/src/v0.8/interfaces/LinkTokenInterface.sol";
+import {ENSNamehash} from "@ens-namehash/contracts/ENSNameHash.sol";
 
 interface ENS {
     function owner(bytes32 node) external view returns (address);
 }
 
 contract CCEResolve is CCIPReceiver {
+    using ENSNamehash for bytes;
+
     event OwnerSent(string ensDomain, address owner);
 
     address public constant ENS_ADDRESS = 0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e; // same for every chain
@@ -29,7 +32,7 @@ contract CCEResolve is CCIPReceiver {
     }
 
     function resolveOwner(string memory _domain) private view returns (address) {
-        bytes32 node = keccak256(abi.encodePacked(bytes32(0), keccak256(abi.encodePacked(_domain))));
+        bytes32 node = bytes(_domain).namehash();
         address owner = ENS(ENS_ADDRESS).owner(node);
         return owner;
     }
