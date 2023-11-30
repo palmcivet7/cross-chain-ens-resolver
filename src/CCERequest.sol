@@ -36,18 +36,17 @@ contract CCERequest is CCIPReceiver {
         emit ResolutionRequested(_ensDomain);
     }
 
-    function endsWithEth(string memory domain) internal pure returns (bool) {
-        bytes memory domainBytes = bytes(domain);
+    function endsWithEth(string memory _ensDomain) internal pure returns (bool) {
+        bytes memory domainBytes = bytes(_ensDomain);
         bytes memory ethSuffix = bytes(".eth");
 
         uint256 domainLength = domainBytes.length;
         uint256 suffixLength = ethSuffix.length;
 
-        if (domainLength < suffixLength) {
+        if (domainLength < suffixLength + 3) {
             return false;
         }
 
-        // Directly compare the relevant parts of the string
         return domainBytes[domainLength - 4] == ethSuffix[0] // '.'
             && domainBytes[domainLength - 3] == ethSuffix[1] // 'e'
             && domainBytes[domainLength - 2] == ethSuffix[2] // 't'
