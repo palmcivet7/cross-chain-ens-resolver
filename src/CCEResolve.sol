@@ -13,9 +13,6 @@ interface ENS {
 }
 
 contract CCEResolve is CCIPReceiver {
-    error CCEResolve__NoLinkToWithdraw();
-    error CCEResolve__LinkTransferFailed();
-
     using ENSNamehash for bytes;
 
     event OwnerSent(string ensDomain, address owner);
